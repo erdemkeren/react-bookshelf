@@ -5,7 +5,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "format": "prettier --trailing-comma es5 --single-quote --write 'packages/*/*.js' 'packages/*/!(node_modules)/**/*.js'",
+    "format": "prettier --trailing-comma all --single-quote --no-semi --write 'src/*.js' 'src/**/*.js'",
     "precommit": "lint-staged"
   },
   "dependencies": {
@@ -29,7 +29,7 @@
   },
   "lint-staged": {
     "*.js": [
-      "prettier --trailing-comma es5 --single-quote --write",
+      "prettier --trailing-comma all --single-quote --no-semi --write",
       "git add"
     ]
   }
