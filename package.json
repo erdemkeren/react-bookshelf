@@ -1,4 +1,13 @@
 {
+  "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "format": "prettier --trailing-comma es5 --single-quote --write 'packages/*/*.js' 'packages/*/!(node_modules)/**/*.js'",
+    "precommit": "lint-staged"
+  },
   "dependencies": {
     "escape-string-regexp": "^1.0.5",
     "prop-types": "^15.5.8",
@@ -8,12 +17,20 @@
     "sort-by": "^1.2.0"
   },
   "devDependencies": {
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb": "^15.0.2",
+    "eslint-plugin-import": "^2.6.1",
+    "eslint-plugin-jsx-a11y": "^5.1.1",
+    "eslint-plugin-react": "^7.1.0",
+    "husky": "^0.14.3",
+    "lint-staged": "^3.3.1",
+    "prettier": "^1.5.2",
     "react-scripts": "0.9.5"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+  "lint-staged": {
+    "*.js": [
+      "prettier --trailing-comma es5 --single-quote --write",
+      "git add"
+    ]
   }
 }
