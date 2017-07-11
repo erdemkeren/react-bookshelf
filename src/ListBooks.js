@@ -4,14 +4,18 @@ import { Link } from 'react-router-dom'
 import BookShelf from './BookShelf'
 
 export default class ListBooks extends Component {
+  constructor(props) {
+    super(props)
+
+    this.onBookShelfChanged = this.onBookShelfChanged.bind(this)
+  }
+
+  onBookShelfChanged(book, newShelf) {
+    this.props.onBookShelfChanged(book, newShelf)
+  }
+
   render() {
-    const { books } = this.props
-
-    const read = books.filter(book => book.shelf === 'read')
-
-    const wantToRead = books.filter(book => book.shelf === 'wantToRead')
-
-    const currReading = books.filter(book => book.shelf === 'currentlyReading')
+    const { currentlyReading, wantToRead, read } = this.props
 
     return (
       <div className="list-books">
@@ -20,9 +24,21 @@ export default class ListBooks extends Component {
         </div>
         <div className="list-books-content">
           <div>
-            <BookShelf name="Currently Reading" books={currReading} />
-            <BookShelf name="Want To Read" books={wantToRead} />
-            <BookShelf name="Read" books={read} />
+            <BookShelf
+              name="Currently Reading"
+              books={currentlyReading}
+              onBookShelfChanged={this.onBookShelfChanged}
+            />
+            <BookShelf
+              name="Want To Read"
+              books={wantToRead}
+              onBookShelfChanged={this.onBookShelfChanged}
+            />
+            <BookShelf
+              name="Read"
+              books={read}
+              onBookShelfChanged={this.onBookShelfChanged}
+            />
           </div>
         </div>
         <div className="open-search">
@@ -34,9 +50,8 @@ export default class ListBooks extends Component {
 }
 
 ListBooks.propTypes = {
-  books: PropTypes.array.isRequired,
-}
-
-ListBooks.defaultProps = {
-  books: [],
+  currentlyReading: PropTypes.array.isRequired,
+  wantToRead: PropTypes.array.isRequired,
+  read: PropTypes.array.isRequired,
+  onBookShelfChanged: PropTypes.func.isRequired,
 }
