@@ -1,69 +1,74 @@
 import React, { Component } from 'react'
 import { Route } from 'react-router-dom'
+import dcopy from 'deep-copy'
 import './App.css'
 import Search from './Search'
 import ListBooks from './ListBooks'
 import * as BooksAPI from './BooksAPI'
 
 export default class BooksApp extends Component {
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      currentlyReading: [],
-      wantToRead: [],
-      read: [],
-    }
-
-    this.onBookShelfChanged = this.onBookShelfChanged.bind(this)
+  state = {
+    books: [],
   }
 
   componentDidMount() {
     this.loadBooks()
   }
 
-  onBookShelfChanged(book, newShelf) {
-    BooksAPI.update(book, newShelf).then(shelves => {
-      const currentlyReading = this.state.currentlyReading.filter(cBook =>
-        shelves.currentlyReading.includes(cBook.id),
-      )
+  onBookShelfChanged = (book, newShelf) => {
+    const stateBackup = dcopy(this.state)
 
-      const wantToRead = this.state.wantToRead.filter(cBook =>
-        shelves.wantToRead.includes(cBook.id),
-      )
+    book.shelf = newShelf
 
-      const read = this.state.read.filter(cBook =>
-        shelves.read.includes(cBook.id),
-      )
+    let bookExists = false
+    const books = this.state.books
+      .map(cBook => {
+        if (cBook.id === book.id) {
+          bookExists = true
 
-      const newState = { currentlyReading, wantToRead, read }
+          return book
+        }
 
-      const updatedBook = book
-      updatedBook.shelf = newShelf
-      newState[newShelf].push(updatedBook)
+        return cBook
+      })
+      .filter(cBook => cBook.shelf !== 'none')
 
-      this.setState(newState)
-    })
+    if (!bookExists) {
+      books.push(book)
+    }
+
+    this.setState({ books })
+
+    BooksAPI.update(book, newShelf)
+      .then(() => {
+        const books = this.state.books.map(prevBook => {
+          if (prevBook.id === book.id) {
+            prevBook.isDisabled = false
+          }
+
+          return prevBook
+        })
+
+        this.setState({ books })
+      })
+      .catch(error => {
+        this.setState(stateBackup)
+      })
   }
 
   loadBooks() {
     BooksAPI.getAll().then(books => {
-      const read = books.filter(book => book.shelf === 'read')
-      const wantToRead = books.filter(book => book.shelf === 'wantToRead')
-      const currentlyReading = books.filter(
-        book => book.shelf === 'currentlyReading',
-      )
-
-      this.setState({
-        read,
-        wantToRead,
-        currentlyReading,
-      })
+      this.setState({ books })
     })
   }
 
   render() {
-    const { read, wantToRead, currentlyReading } = this.state
+    const books = this.state.books
+    const read = books.filter(book => book.shelf === 'read')
+    const wantToRead = books.filter(book => book.shelf === 'wantToRead')
+    const currentlyReading = books.filter(
+      book => book.shelf === 'currentlyReading',
+    )
 
     return (
       <div className="app">
@@ -79,7 +84,10 @@ export default class BooksApp extends Component {
             />}
         />
 
-        <Route path="/search" component={Search} />
+        <Route
+          path="/search"
+          render={() => <Search onBookShelfChanged={this.onBookShelfChanged} />}
+        />
       </div>
     )
   }

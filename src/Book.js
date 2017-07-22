@@ -2,12 +2,22 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
 export default class Book extends Component {
+  static propTypes = {
+    book: PropTypes.object.isRequired,
+    onShelfChanged: PropTypes.func.isRequired,
+  }
+
   moveToShelf(event) {
     this.props.onShelfChanged(this.props.book, event.target.value)
   }
 
   render() {
     const { book } = this.props
+
+    // My First Life by Brenda Dean Paul doesn't have one.
+    const smallThumbnail = book.hasOwnProperty('imageLinks')
+      ? book.imageLinks.smallThumbnail
+      : ''
 
     return (
       <div className="book">
@@ -19,7 +29,7 @@ export default class Book extends Component {
             style={{
               width: 128,
               height: 193,
-              backgroundImage: `url(${book.imageLinks.smallThumbnail})`,
+              backgroundImage: `url(${smallThumbnail})`,
             }}
           />
 
@@ -30,21 +40,29 @@ export default class Book extends Component {
               value={book.shelf}
             >
               {/* "Move to..." menu title */}
-              <option value="none" disabled>
+              <option value="select" disabled>
                 Move to...
               </option>
 
               {/* Move the book to currently reading shelf. */}
-              <option value="currentlyReading">Currently Reading</option>
+              <option value="currentlyReading" disabled={book.isDisabled}>
+                Currently Reading
+              </option>
 
               {/* Move the book to want to read shelf. */}
-              <option value="wantToRead">Want to Read</option>
+              <option value="wantToRead" disabled={book.isDisabled}>
+                Want to Read
+              </option>
 
               {/* Move the book to read shelf. */}
-              <option value="read">Read</option>
+              <option value="read" disabled={book.isDisabled}>
+                Read
+              </option>
 
               {/* Move the book out of the shelves. */}
-              <option value="none">None</option>
+              <option value="none" disabled={book.isDisabled}>
+                None
+              </option>
             </select>
           </div>
         </div>
@@ -54,18 +72,15 @@ export default class Book extends Component {
           {book.title}
         </div>
 
-        {/* The authors of the book */}
-        {book.authors.map((author, key) =>
-          <div key={`${book.id}-author-${key}`} className="book-authors">
-            {author}
-          </div>,
-        )}
+        {/* The authors of the book if any */}
+        {book.authors
+          ? book.authors.map((author, key) =>
+              <div key={`${book.id}-author-${key}`} className="book-authors">
+                {author}
+              </div>,
+            )
+          : ''}
       </div>
     )
   }
-}
-
-Book.propTypes = {
-  book: PropTypes.object.isRequired,
-  onShelfChanged: PropTypes.func.isRequired,
 }

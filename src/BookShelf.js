@@ -3,18 +3,33 @@ import PropTypes from 'prop-types'
 import Book from './Book'
 
 export default class BookShelf extends Component {
-  constructor() {
-    super()
-
-    this.changeBookShelf = this.changeBookShelf.bind(this)
+  static propTypes = {
+    name: PropTypes.string.isRequired,
+    books: PropTypes.array.isRequired,
+    onBookShelfChanged: PropTypes.func.isRequired,
   }
 
-  changeBookShelf(book, newShelf) {
+  changeBookShelf = (book, newShelf) => {
     this.props.onBookShelfChanged(book, newShelf)
   }
 
   render() {
     const { name, books } = this.props
+
+    let bookList = null
+    if (books.length === 0) {
+      bookList = (
+        <li key="empty">
+          <span>No books for this shelf at the moment.</span>
+        </li>
+      )
+    } else {
+      bookList = books.map(book =>
+        <li key={book.id}>
+          <Book book={book} onShelfChanged={this.changeBookShelf} />
+        </li>,
+      )
+    }
 
     return (
       <div className="bookshelf">
@@ -23,20 +38,10 @@ export default class BookShelf extends Component {
         </h2>
         <div className="bookshelf-books">
           <ol className="books-grid">
-            {books.map(book =>
-              <li key={book.id}>
-                <Book book={book} onShelfChanged={this.changeBookShelf} />
-              </li>,
-            )}
+            {bookList}
           </ol>
         </div>
       </div>
     )
   }
-}
-
-BookShelf.propTypes = {
-  name: PropTypes.string.isRequired,
-  books: PropTypes.array.isRequired,
-  onBookShelfChanged: PropTypes.func.isRequired,
 }
